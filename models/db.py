@@ -43,7 +43,7 @@ def initialize(app: Flask, config_data: dict[str, Any]) -> AppEngine:
     with app_engine.Session() as session:
         exists = session.query(models.AboutMe).first()
         if not exists:
-            about = models.AboutMe()
+            about = models.AboutMe(contents='#### Insert About Me Contents Here')
             session.add(about)
             session.commit()
         else:
