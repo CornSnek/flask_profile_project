@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Create Image URL{% endblock %}
+{% block body %}
+<div id="to-dashboard-link">
+    <a href="{{ url_for('dashboard.page') }}">Go Back</a>
+</div>
+<div id="popup-contents-load">
+    <h1>Create Image URL</h1>
+    <form id="form-submit" action="{{ url_for('image_urls.create') }}" method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.name.label() }}
+        {{ form.name() }}
+        <br>
+        <span class="form-errors" id="form-{{ form.name.name }}"></span>
+        <br>
+        {{ form.url.label() }}
+        {{ form.url() }}
+        <br>
+        <span class="form-errors" id="form-{{ form.url.name }}"></span>
+        <br>
+        {{ form.description.label() }}
+        {{ form.description() }}
+        <br>
+        <span class="form-errors" id="form-{{ form.description.name }}"></span>
+        <br>
+        {{ form.submit() }}
+    </form>
+    <script id="popup-contents-script">
+        async function submit_form(e){
+            e.preventDefault();
+            for(const elem_span of document.getElementsByClassName('form-errors')){
+                elem_span.textContent=''
+            }
+            fetch("{{ url_for('image_urls.create') }}", {
+                method: "POST",
+                body: new FormData(document.getElementById('form-submit'))
+            }).then(response => response.json())
+            .then(data => {
+                if(data.wtferrors){
+                    for(const field in data.wtferrors){
+                        const form_error = document.getElementById(`form-${field}`);
+                        form_error.innerHTML=data.wtferrors[field].join('<br>');
+                    }
+                }
+                flash_message_json(data.category, data.message)
+                needs_refresh=true;
+            });
+        }
+        document.getElementById('form-submit').addEventListener('submit', submit_form);
+    </script>
+</div>
+{% endblock %}

@@ -1,0 +1,185 @@
+{% macro template(project_json) -%}
+    <div id="preview-edit-links">
+        <!-- Don't change ordering due to const anchors variable referring to the absolute index values. -->
+        <a href="#" class="filter-selected">Preview</a> <a href="#">Order Links</a> <a href="#" class="create-tag" style="display:none;">Save Ordering</a>
+    </div>
+    <div class="project-div">
+        <h1>{{ project_json.name }}</h1>
+        {% if project_json.languages %}
+            <h4>
+                Languages/Tags:
+                    {% for language in project_json.languages %}
+                        <a href="{{ url_for('dashboard.language_update', lid=language.id) }}" data-a-ajax="y">{{ language.name }}</a>
+                    {% endfor %}
+            </h4>
+        {% endif %}
+        {% if project_json.image_urls %}
+            <div id="project-media">
+                {% for image_url in project_json.image_urls %}
+                    <figure draggable="true" class="draggable-image" data-id="{{ image_url.id }}">
+                        <img src="{{ image_url.url }}" alt="{{ image_url.description }}">
+                        <a href="{{ url_for('dashboard.image_url_update', iuid=image_url.id) }}" data-a-ajax="y"><figcaption>{{ image_url.description }}</figcaption></a>
+                    </figure>
+                    <div class="drag-dropzone-image">+</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ project_json.content | safe }}
+        {% if project_json.urls %}
+            <h4 class="project-links">
+                Links:
+                <ul id="draggable-link-container">
+                    {% for link in project_json.urls %}
+                        <li data-id="{{ link.id }}"><a draggable="true" class="draggable-link" href="{{ url_for('dashboard.url_update', uid=link.id) }}" data-a-ajax="y">{{ link.url }}</a> ({{ link.description }})</li>
+                        <div class="drag-dropzone-link">+</div>
+                    {% endfor %}
+                </ul>
+            </h4>
+        {% endif %}
+    </div>
+    <script id="popup-contents-script-2">
+        let obj_dragged;
+        function reorder_draggables(target_index, id_name){
+            const draggable_container=document.getElementById(id_name);
+            const obj_ref=draggable_container.children[obj_dragged];
+            const drop_target_ref=draggable_container.children[obj_dragged+1];
+            if(target_index === draggable_container.children.length - 2){ //End drag zone
+                draggable_container.appendChild(obj_ref);
+                draggable_container.appendChild(drop_target_ref);
+            }else if (target_index >= obj_dragged){ //+2 to target_index because of pointing the element before it.
+                draggable_container.insertBefore(drop_target_ref,draggable_container.children[target_index+2]);
+                draggable_container.insertBefore(obj_ref,drop_target_ref);
+            } else {
+                draggable_container.insertBefore(drop_target_ref,draggable_container.children[target_index]);
+                draggable_container.insertBefore(obj_ref,drop_target_ref);
+            }
+            obj_dragged=undefined;
+        }
+
+        //Code to get the obj_dragged reference id and change ordering of links and image_urls 
+        const drag_dropzone_links=document.getElementsByClassName('drag-dropzone-link');
+        const draggable_links=document.getElementsByClassName('draggable-link');
+        for(const dropzone of drag_dropzone_links){
+            dropzone.addEventListener('drop',e=>{
+                e.preventDefault();
+                dropzone.classList.remove('drag-dropzone-highlight');
+                const dlc=Array.from(document.getElementById('draggable-link-container').children);
+                reorder_draggables(dlc.indexOf(dropzone)-1, 'draggable-link-container');
+            });
+            dropzone.addEventListener('dragover', e=>{
+                e.preventDefault();
+                dropzone.classList.add('drag-dropzone-highlight');
+            });
+            dropzone.addEventListener('dragleave', e=>{
+                dropzone.classList.remove('drag-dropzone-highlight');
+            });
+        }
+        for(const draggable of draggable_links){
+            draggable.addEventListener('dragstart', e=>{
+                const dlc=Array.from(document.getElementById('draggable-link-container').children);
+                for(let i=0; i<dlc.length; i+=2){ //Linear search to get correct index of dragged link.
+                    if(dlc[i]===draggable.parentNode){ //Check if same <li>
+                        obj_dragged=i;
+                        break;
+                    }
+                }
+            });
+        }
+
+        const drag_dropzone_images=document.getElementsByClassName('drag-dropzone-image');
+        const draggable_images=document.getElementsByClassName('draggable-image');
+        for(const dropzone of drag_dropzone_images){
+            dropzone.addEventListener('drop',e=>{
+                e.preventDefault();
+                dropzone.classList.remove('drag-dropzone-highlight');
+                const pm=Array.from(document.getElementById('project-media').children);
+                reorder_draggables(pm.indexOf(dropzone)-1, 'project-media');
+            });
+            dropzone.addEventListener('dragover', e=>{
+                e.preventDefault();
+                dropzone.classList.add('drag-dropzone-highlight');
+            });
+            dropzone.addEventListener('dragleave', e=>{
+                dropzone.classList.remove('drag-dropzone-highlight');
+            });
+        }
+        const project_media=document.getElementById('project-media');
+        let drag_image=false;
+        for(const draggable of draggable_images){
+            draggable.addEventListener('dragstart', e=>{
+                const pm=Array.from(project_media.children);
+                obj_dragged=pm.indexOf(draggable);
+            });
+            draggable.addEventListener('drag', e=>{
+                if (e.pageX === 0 && e.pageY === 0) return; //Don't record top-left corner of browser when ending drag.
+                const pm_rect=project_media.getBoundingClientRect();
+                //x coodrinate as dragged child element relative to project_media container.
+                const x = e.pageX - pm_rect.left - window.scrollX;
+                if(x < 0.0) project_media.scrollLeft += x;
+                else if(x > project_media.clientWidth) project_media.scrollLeft += x - project_media.clientWidth;
+            });
+        }
+
+        const anchors=document.getElementById('preview-edit-links').children;
+        const save_ordering=document.getElementById('save-ordering');
+        function project_preview(e){
+            e.preventDefault();
+            anchors[1].classList.remove('filter-selected');
+            anchors[0].classList.add('filter-selected');
+            for (const dropzone of drag_dropzone_links){
+                dropzone.style.display='none';
+            }
+            for (const dropzone of drag_dropzone_images){
+                dropzone.style.display='none';
+            }
+            anchors[2].style.display='none';
+        }
+        function project_edit(e){
+            e.preventDefault();
+            anchors[0].classList.remove('filter-selected');
+            anchors[1].classList.add('filter-selected');
+            for (const dropzone of drag_dropzone_links){
+                dropzone.style.display='block';
+            }
+            for (const dropzone of drag_dropzone_images){
+                dropzone.style.display='inline';
+            }
+            anchors[2].style.display='inline';
+        }
+        async function project_save_ordering(e){
+            e.preventDefault();
+            const url_ids=Array.from(document.getElementsByClassName('draggable-link')).map(e=>
+                e.parentElement.getAttribute('data-id')
+            );
+            const image_ids=Array.from(document.getElementsByClassName('draggable-image')).map(e=>
+                e.getAttribute('data-id')
+            );
+            const link=new URL("{{ url_for('at_links.sort_order') }}",location_href);
+            link.searchParams.append('project_id',"{{ project_json.id }}");
+            url_ids.forEach(id=>link.searchParams.append('url_id',id));
+            image_ids.forEach(id=>link.searchParams.append('image_id',id));
+            fetch(link.toString(),{method: "POST"}) 
+                .then(response=>response.json())
+                .then(data=>flash_message_json(data.category, data.message));
+        }
+        anchors[0].addEventListener('click',project_preview);
+        anchors[1].addEventListener('click',project_edit);
+        anchors[2].addEventListener('click',project_save_ordering);
+        const anchor_tree_walker = document.createTreeWalker(
+            document.getElementsByClassName('project-div')[0],
+            NodeFilter.SHOW_ELEMENT,
+            {
+                acceptNode: node => 
+                    node.getAttribute('data-a-ajax') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
+            }
+        );
+        let anchor;
+        while((anchor = anchor_tree_walker.nextNode())){
+            const to_href=anchor.href;
+            anchor.addEventListener('click', e=>{
+                e.preventDefault();
+                ajax_to_link(to_href);
+            });
+        }
+    </script>
+{%- endmacro %}

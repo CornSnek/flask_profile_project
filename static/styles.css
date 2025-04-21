@@ -1,0 +1,253 @@
+:root {
+    --background1: darkslategray;
+    --background2: #283f3f;
+    --background3: #1f2f2f;
+    --background4: #0f1f1f;
+    --color1: lightgreen;
+    --color2: lightblue;
+    --color3: lightyellow;
+    --color4: lightcoral;
+    --color5: red;
+    background-color: var(--background3);
+    font-family: "Courier New", Courier, monospace;
+    color: var(--color1);
+    line-height: 1.375;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 5px;
+}
+
+.no-scroll {
+    overflow: hidden;
+}
+
+input {
+    background-color: var(--background3);
+    border-radius: 5px;
+    color: var(--color1);
+    border-color: var(--color1);
+}
+
+a {
+    text-decoration: none;
+    color: var(--color2);
+    border: 1px dashed;
+    border-radius: 5px;
+    padding: 0 10px;
+    background-color: var(--background4);
+}
+
+a.filter-selected {
+    background-color: var(--color2);
+    color: var(--background3);
+}
+
+a.create-tag {
+    color: var(--color1);
+}
+
+a.delete-tag {
+    color: var(--color4);
+}
+
+a:hover {
+    background-color: var(--color2);
+    color: var(--background3);
+}
+
+#to-dashboard-link {
+    text-align: right;
+}
+
+#flash-messages {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    z-index: 3;
+}
+
+.flash {
+    background-color: var(--background4);
+    border-radius: 5px;
+    border: 1px solid;
+    padding: 5px 10px;
+    margin: 5px 0;
+}
+
+.flash.message {
+    color: var(--color3);
+}
+
+.flash.error {
+    color: var(--color5);
+}
+
+.close-flash {
+    color: var(--color2);
+    border: 1px dashed;
+    border-radius: 5px;
+}
+
+.close-flash:hover {
+    cursor: pointer;
+    background-color: var(--color2);
+    color: var(--background3);
+}
+
+#edit-image-urls,
+#edit-about-me,
+#about-me,
+#edit-languages,
+#edit-urls,
+#edit-projects,
+#languages-div,
+#projects-div,
+.project-div,
+#popup-contents,
+#popup-contents-load {
+    background-color: var(--background1);
+    border-radius: 5px;
+    border: 1px solid;
+    padding: 5px 10px;
+    margin: 20px 10px;
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+}
+
+.project-div {
+    padding: 0 20px;
+    margin: 10px 10px;
+    background-color: var(--background2);
+}
+
+.project-links {
+    text-align: left;
+}
+
+#project-media {
+    display: flex;
+    overflow-x: auto;
+    background-color: var(--background3);
+    border-radius: 5px;
+    border: 1px solid;
+    padding: 5px 10px;
+    margin: 20px 10px;
+    gap: 0;
+    white-space: nowrap;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+}
+
+#project-media figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    text-align: center;
+    max-width: 300px;
+    margin: 10px 5px;
+    gap: 10px;
+}
+
+#project-media img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    color: var(--background3)
+}
+
+.textarea-edit {
+    width: 90%;
+    height: 150px;
+    background-color: var(--background3);
+    border-radius: 5px;
+    color: var(--color1);
+    border-color: var(--color1);
+    resize: vertical;
+}
+
+.form-errors {
+    color: var(--color4);
+}
+
+#submit-delete {
+    color: var(--color5);
+    border-color: var(--color5);
+}
+
+#edit-languages-form {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+#popup-overlay {
+    position: fixed;
+    display: none;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+
+#popup-buttons {
+    position: fixed;
+    z-index: 4;
+}
+
+#popup-contents {
+    margin: 0;
+}
+
+#popup-container {
+    top: 1.5rem;
+    position: relative;
+    width: 80%;
+    height: 100%;
+    left: 10%;
+    overflow-y: auto;
+    resize: none;
+}
+
+.links-container {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.drag-dropzone-link {
+    display: none;
+    border: 1px dashed;
+    border-color: var(--color1);
+    text-align: center;
+}
+
+.drag-dropzone-image {
+    display: none;
+    border: 1px dashed;
+    border-color: var(--color1);
+    text-align: center;
+    height: 80%;
+    line-height: 100%;
+    width: 10px;
+    justify-content: center;
+}
+
+.drag-dropzone-highlight {
+    color: var(--background3);
+    border-color: var(--background3);
+    background-color: var(--color1);
+}

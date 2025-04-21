@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Project{% endblock %}
+{% block body %}
+<div id="to-dashboard-link">
+    <a href="{{ url_for('dashboard.page') }}">Go Back</a>
+</div>
+<div id="popup-contents-load">
+    <h1>Edit Project</h1>
+    <form id="form-update" action="{{ url_for('project.update') }}" method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.name.label() }}
+        {{ form.name() }}
+        <br>
+        <span class="form-errors" id="form-{{ form.name.name }}"></span>
+        <br>
+        {{ form.content.label() }}
+        <br>
+        {{ form.content() }}
+        <br>
+        <span class="form-errors" id="form-{{ form.content.name }}"></span>
+        <br>
+        {{ form.submit() }}
+    </form>
+    <form action="{{ url_for('project.delete') }}" method="POST">
+        {{ form.hidden_tag() }}
+        <input id="submit-delete" name="submit" type="submit" value="Delete" onclick="return confirm('Are you sure?')">
+    </form>
+    <script id="popup-contents-script">
+        async function submit_form(e){
+            e.preventDefault();
+            for(const elem_span of document.getElementsByClassName('form-errors')){
+                elem_span.textContent=''
+            }
+            fetch("{{ url_for('project.update') }}",{
+                method: "POST",
+                body: new FormData(document.getElementById('form-update'))
+            }).then(response => response.json())
+            .then(data => {
+                if(data.wtferrors){
+                    for(const field in data.wtferrors){
+                        const form_error = document.getElementById(`form-${field}`);
+                        form_error.innerHTML=data.wtferrors[field].join('<br>');
+                    }
+                }
+                flash_message_json(data.category, data.message)
+                if(data.category==='info')
+                    ajax_to_link("{{ url_for('dashboard.project_update', pid=project_json.id) }}")
+            });
+        }
+        document.getElementById('form-update').addEventListener('submit', submit_form);
+    </script>
+    <h1>Preview</h1>
+    {{ project_html | safe }}
+</div>
+{% endblock %}

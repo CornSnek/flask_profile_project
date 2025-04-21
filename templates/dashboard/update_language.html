@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Language{% endblock %}
+{% block body %}
+<div id="to-dashboard-link">
+    <a href="{{ url_for('dashboard.page') }}">Go Back</a>
+</div>
+<div id="popup-contents-load">
+    <h1>Update/Delete Language</h1>
+    <div>
+        <form id="form-update" action="{{ url_for('languages.update') }}" method="POST">
+            {{ form.hidden_tag() }}
+            {{ form.name.label() }}
+            {{ form.name() }}
+            <br>
+            <span class="form-errors" id="form-{{ form.name.name }}"></span>
+            <br>
+            <input id="language-submit-update" name="submit" type="submit" value="Update">
+        </form>
+        <form action="{{ url_for('languages.delete') }}" method="POST">
+            {{ form.hidden_tag() }}
+            <input id="submit-delete" name="submit" type="submit" value="Delete" onclick="return confirm('Are you sure? This tag will also be deleted in any used projects.')">
+        </form>
+    </div>
+    <script id="popup-contents-script">
+        async function submit_form(e){
+            e.preventDefault();
+            for(const elem_span of document.getElementsByClassName('form-errors')){
+                elem_span.textContent=''
+            }
+            fetch("{{ url_for('languages.update') }}",{
+                method: "POST",
+                body: new FormData(document.getElementById('form-update'))
+            }).then(response => response.json())
+            .then(data => {
+                if(data.wtferrors){
+                    for(const field in data.wtferrors){
+                        const form_error = document.getElementById(`form-${field}`);
+                        form_error.innerHTML=data.wtferrors[field].join('<br>');
+                    }
+                }
+                flash_message_json(data.category, data.message)
+                needs_refresh=true;
+            });
+        }
+        document.getElementById('form-update').addEventListener('submit', submit_form);
+    </script>
+    <h1>Link/Unlink Tags To Projects</h1>
+    <h3 id="update-language-project-links">
+        {% for project in used_in_projects %}
+            <span class="links-container">
+                <a href="{{ url_for('dashboard.project_update', pid=project.id) }}" data-a-ajax="r">{{ project.name }}</a>
+                <a href="{{ url_for('at_links.unlink_language', pid=project.id, lid=form.id.data) }}" class="delete-tag" data-a-ajax="d">Unlink</a>
+            </span>
+        {% endfor %}
+        {% if used_in_projects %}
+            <br>
+            <br>
+        {% endif %}
+        {% for project in not_used_in_projects %}
+            <span class="links-container">
+                <a href="{{ url_for('dashboard.project_update', pid=project.id) }}" data-a-ajax="r">{{ project.name }}</a>
+                <a href="{{ url_for('at_links.link_language', pid=project.id, lid=form.id.data) }}" class="create-tag" data-a-ajax="c">Link</a>
+            </span>
+        {% endfor %}
+    </h3>
+    <script id="popup-contents-script-2">
+        const anchor_tree_walker = document.createTreeWalker(
+            document.getElementById('update-language-project-links'),
+            NodeFilter.SHOW_ELEMENT,
+            {
+                acceptNode: node => 
+                    node.getAttribute('data-a-ajax') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
+            }
+        );
+        let anchor;
+        while((anchor = anchor_tree_walker.nextNode())){
+            const to_href=anchor.href;
+            switch(anchor.getAttribute('data-a-ajax')){
+                case 'r':
+                    anchor.addEventListener('click', e=>{
+                        e.preventDefault();
+                        ajax_to_link(to_href);
+                    });
+                    break;
+                case 'c':
+                case 'd':
+                    anchor.addEventListener('click', e=>{
+                        e.preventDefault();
+                        fetch(to_href)
+                        .then(response => response.json())
+                        .then(data => {
+                            flash_message_json(data.category, data.message);
+                            ajax_to_link("{{ url_for('dashboard.language_update', lid=form.id.data) }}");
+                        });
+                        needs_refresh=true;
+                    });
+                    break;
+                default:
+                    throw Error('data-a-ajax should be letter c, r, or d');
+            }
+        }
+    </script>
+</div>
+{% endblock %}

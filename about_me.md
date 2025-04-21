@@ -1,0 +1,1 @@
+#### Hello! I am a hobbyist programmer that likes to code in C-like languages. I like coding projects where I want to solve a problem or because I am interested in how the mathematics or the algorithm works, like converting regex to a finite state machine, or creating a version manager for a programming language. This website shows some projects that I have made.

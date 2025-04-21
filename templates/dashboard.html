@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block body %}
+<div id="to-dashboard-link">
+    <a href="{{ url_for('dashboard.logout') }}">Logout user '{{ current_user.username }}'</a>
+</div>
+<div id="edit-about-me">
+    <h1>Edit About Me</h1>
+    <form action="{{ url_for('about_me.post') }}" method="POST">
+        {{ about_me_form.hidden_tag() }}
+        {{ about_me_form.markdown() }}
+        {% for error in about_me_form.markdown.errors %}
+            <span class="form-errors">{{ error }}</span>
+        {% endfor %}
+        {{ about_me_form.submit() }}
+    </form>
+</div>
+<div id="about-me">
+    <h1>About Me (Preview)</h1>
+    {{ about_me_html | safe }}
+</div>
+<div id="edit-languages">
+    <h1>Edit Languages/Tags</h1>
+    <h4>Click to rename/delete a tag, or + to create a new tag</h4>
+    <h4 id="edit-languages-links">
+        {% for language in languages_db %}
+            <a href="{{ url_for('dashboard.language_update', lid=language.id) }}">{{ language.name }}</a>
+        {% endfor %}
+        <a href="{{ url_for('dashboard.language_create') }}" class="create-tag">+</a>
+    </h4>
+</div>
+<div id="edit-urls">
+    <h1>Edit URLs</h1>
+    <h4 id="edit-urls-links">
+        {% for url in urls_db %}
+            <a href="{{ url_for('dashboard.url_update', uid=url.id) }}">{{ url.name }}</a>
+        {% endfor %}
+        <a href="{{ url_for('dashboard.url_create') }}" class="create-tag">+</a>
+    </h4>
+</div>
+<div id="edit-image-urls">
+    <h1>Edit Image URLs</h1>
+    <h4 id="edit-image-urls-links">
+        {% for image_url in image_urls_db %}
+            <a href="{{ url_for('dashboard.image_url_update', iuid=image_url.id) }}">{{ image_url.name }}</a>
+        {% endfor %}
+        <a href="{{ url_for('dashboard.image_url_create') }}" class="create-tag">+</a>
+    </h4>
+</div>
+<div id="edit-projects">
+    <h1>Edit Project</h1>
+    <h4 id="edit-projects-links">
+        {% for project in projects_db %}
+            <a href="{{ url_for('dashboard.project_update', pid=project.id) }}">{{ project.name }}</a>
+        {% endfor %}
+        <a href="{{ url_for('dashboard.project_create') }}" class="create-tag">+</a>
+    </h4>
+</div>
+<script>
+    for(const anchor of document.getElementById('edit-languages-links').children){
+        anchor.addEventListener('click', e=>{
+            e.preventDefault();
+            ajax_to_link(anchor.href);
+        });
+    }
+    for(const anchor of document.getElementById('edit-urls-links').children){
+        anchor.addEventListener('click', e=>{
+            e.preventDefault();
+            ajax_to_link(anchor.href);
+        });
+    }
+    for(const anchor of document.getElementById('edit-image-urls-links').children){
+        anchor.addEventListener('click', e=>{
+            e.preventDefault();
+            ajax_to_link(anchor.href);
+        });
+    }
+    for(const anchor of document.getElementById('edit-projects-links').children){
+        anchor.addEventListener('click', e=>{
+            e.preventDefault();
+            ajax_to_link(anchor.href);
+        });
+    }
+</script>
+{% endblock %}

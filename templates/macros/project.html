@@ -1,0 +1,38 @@
+{% macro template(project_json) -%}
+    <div class="project-div">
+        <h1>{{ project_json.name }}</h1>
+        {% if project_json.languages %}
+            <h4>
+                Languages/Tags:
+                    {% for language in project_json.languages %}
+                        {% if filter_lang==language.id %}
+                            <a href="{{ url_for('home.page') }}" class="filter-selected">{{ language.name }}</a>
+                        {% else %}
+                            <a href="{{ url_for('home.page', language_id=language.id) }}">{{ language.name }}</a>
+                        {% endif %}
+                    {% endfor %}
+            </h4>
+        {% endif %}
+        {% if project_json.image_urls %}
+            <div id="project-media">
+                {% for image_url in project_json.image_urls %}
+                    <figure>
+                        <img src="{{ image_url.url }}" alt="{{ image_url.description }}">
+                        <a href="{{ image_url.url }}" target="_blank" rel="noopener noreferrer"><figcaption>{{ image_url.description }}</figcaption></a>
+                    </figure>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ project_json.content | safe }}
+        {% if project_json.urls %}
+            <h4 class="project-links">
+                Links:
+                <ul>
+                    {% for link in project_json.urls %}
+                        <li><a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.url }}</a> ({{ link.description }})</li>
+                    {% endfor %}
+                </ul>
+            </h4>
+        {% endif %}
+    </div>
+{%- endmacro %}

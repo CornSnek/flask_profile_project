@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Create Project{% endblock %}
+{% block body %}
+<div id="to-dashboard-link">
+    <a href="{{ url_for('dashboard.page') }}">Go Back</a>
+</div>
+<div id="popup-contents-load">
+    <h1>Create Project</h1>
+    <form id="form-submit" action="{{ url_for('project.create') }}">
+        {{ form.hidden_tag() }}
+        {{ form.name.label() }}
+        {{ form.name() }}
+        <br>
+        <span class="form-errors" id="form-{{ form.name.name }}"></span>
+        <br>
+        {{ form.content.label() }}
+        {{ form.content() }}
+        <br>
+        <span class="form-errors" id="form-{{ form.content.name }}"></span>
+        <br>
+        {{ form.submit() }}
+    </form>
+    <script id="popup-contents-script">
+        async function submit_form(e){
+            e.preventDefault();
+            for(const elem_span of document.getElementsByClassName('form-errors')){
+                elem_span.textContent=''
+            }
+            fetch("{{ url_for('project.create') }}", {
+                method: "POST",
+                body: new FormData(document.getElementById('form-submit'))
+            }).then(response => response.json())
+            .then(data => {
+                if(data.wtferrors){
+                    for(const field in data.wtferrors){
+                        const form_error = document.getElementById(`form-${field}`);
+                        form_error.innerHTML=data.wtferrors[field].join('<br>');
+                    }
+                }
+                flash_message_json(data.category, data.message)
+                needs_refresh=true;
+            });
+        }
+        document.getElementById('form-submit').addEventListener('submit', submit_form);
+    </script>
+</div>
+{% endblock %}

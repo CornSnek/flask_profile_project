@@ -1,0 +1,39 @@
+{% import 'macros/project.html' as project %}
+{% extends "base.html" %}
+{% block title %}Jeremy Daffon - Programmer Profile{% endblock %}
+{% block body %}
+{% if current_user.is_authenticated %}
+<div id="to-dashboard-link">
+    <a href="{{ url_for('dashboard.page') }}">To Dashboard</a>
+</div>
+{% else %}
+<div id="to-dashboard-link">
+    <a href="{{ url_for('login.page') }}">Login to Dashboard</a>
+</div>
+{% endif %}
+<div id="about-me">
+    <h1>About Me</h1>
+    {{ about_me_markdown | safe }}
+</div>
+<div id="languages-div">
+    <h1>Languages</h1>
+    <h4>
+        Click on a tag to enable/disable filtering.<br><br>
+        {% for language in languages_db %}
+            {% if filter_lang==language.id %}
+                <a href="{{ url_for('home.page') }}" class="filter-selected">{{ language.name }}</a>
+            {% else %}
+                <a href="{{ url_for('home.page', language_id=language.id) }}">{{ language.name }}</a>
+            {% endif %}
+        {% endfor %}
+    </h4>
+</div>
+<div id="projects-div">
+    <h1>Projects</h1>
+    {% if projects_html %}
+        {{ projects_html | safe }}
+    {% else %}
+        <h3>No project has this language/tag yet.</h3>
+    {% endif %}
+</div>
+{% endblock %}

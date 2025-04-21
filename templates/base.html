@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>{% block title %}{% endblock %}</title>
+</head>
+
+<body>
+    <script>
+        const location_href = window.location.href;
+        class LinkStack {
+            constructor() {
+                this.items = [];
+            }
+            push(element) {
+                this.items.push(element);
+            }
+            last_link() {
+                if (this.items.length >= 2) {
+                    while (true) {
+                        const last_item = this.items.pop();
+                        if (this.items.length === 0) return null;
+                        const last_item2 = this.items[this.items.length - 1];
+                        //If pointing to the same link (relative/absolute), use a different link instead.
+                        if (new URL(last_item, location_href).href !== new URL(last_item2, location_href).href)
+                            return last_item2;
+                    }
+                } else {
+                    return null;
+                }
+            }
+            clear() {
+                this.items = [];
+            }
+        }
+        const ajax_link_stack = new LinkStack();
+        let needs_refresh = false;
+        function close_popup(e) {
+            e.preventDefault();
+            document.body.classList.remove('no-scroll');
+            if (needs_refresh) {
+                location.reload();
+            }
+            ajax_link_stack.clear();
+            document.getElementById('popup-overlay').style.display = 'none';
+            document.getElementById('popup-contents').textContent = 'Loading...';
+        }
+        function flash_message_html(category, msg) {
+            return `<div class="flash ${category}">${msg} <span class="close-flash" onclick="this.parentElement.style.display='none'">Dismiss</span></div>`;
+        }
+        function flash_message_json(category, msg, append = false) {
+            const flash_messages_div = document.getElementById('flash-messages');
+            if (!append) {
+                flash_messages_div.innerHTML = flash_message_html(category, msg);
+            } else {
+                flash_messages_div.innerHTML += flash_message_html(category, msg);
+            }
+        }
+        async function get_new_flash_messages() {
+            fetch(`{{ url_for('flash.page') }}`)
+                .then(response => response.json())
+                .then(data => {
+                    const flash_messages_div = document.getElementById('flash-messages');
+                    if (data.messages.length > 0) {
+                        flash_messages_div.innerHTML = '';
+                        data.messages.forEach(([category, msg]) => {
+                            flash_messages_div.innerHTML += flash_message_html(category, msg);
+                        })
+                    }
+                });
+        }
+        async function ajax_to_link(link, to_stack = true) {
+            if (to_stack) {
+                ajax_link_stack.push(link);
+            }
+            document.getElementById('popup-overlay').style.display = 'block';
+            document.body.classList.add('no-scroll');
+            fetch(link)
+                .then(response => response.text())
+                .then(data => {
+                    const linkdoc = new DOMParser().parseFromString(data, 'text/html');
+                    document.getElementById('popup-contents').innerHTML = linkdoc.getElementById('popup-contents-load').innerHTML;
+                    eval(document.getElementById('popup-contents-script').textContent); //Call <script> html element to rebind form function.
+                    const script2 = document.getElementById('popup-contents-script-2');
+                    if (script2) {
+                        eval(script2.textContent);
+                    }
+                }).catch(e => {
+                    document.getElementById('popup-contents').textContent = `Error loading page...`;
+                    throw (e);
+                });
+        }
+        async function go_back_one_page(e) {
+            e.preventDefault();
+            let last_link;
+            if ((last_link = ajax_link_stack.last_link()))
+                ajax_to_link(last_link, false);
+        }
+        get_new_flash_messages()
+    </script>
+    <div id="popup-overlay">
+        <div id="popup-buttons">
+            <a id="popup-close-x" href="#" onclick="close_popup(event)">Close</a>
+            <a id="popup-back" href="#" onclick="go_back_one_page(event)">Go Back Previous Page</a>
+        </div>
+        <div id="popup-container">
+            <div id="popup-contents">
+                Loading...
+            </div>
+        </div>
+    </div>
+    <div id="flash-messages"></div>
+    {% block body %}{% endblock %}
+</body>
+
+</html>
