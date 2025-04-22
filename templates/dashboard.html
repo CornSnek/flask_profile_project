@@ -2,6 +2,7 @@
 {% block title %}Dashboard{% endblock %}
 {% block body %}
 <div id="to-dashboard-link">
+    <a href="{{ url_for('home.page') }}">Home</a>
     <a href="{{ url_for('dashboard.logout') }}">Logout user '{{ current_user.username }}'</a>
 </div>
 <div id="edit-about-me">
