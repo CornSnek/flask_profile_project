@@ -180,13 +180,13 @@ def project_create():
 @login_required
 def project_update(pid:int):
     form = ProjectUpdateForm()
-    #Using requests doesn't send the session cookie normally
-    cookies = {'session': request.cookies.get('session')}
-    project_resp_html = requests.get(url_for('project.output', pid=pid, type='html_edit', _external=True), cookies=cookies)
-    project_resp_json = requests.get(url_for('project.output', pid=pid, type='json', _external=True))
-    if project_resp_html.status_code == 200 and project_resp_json.status_code == 200:
-        project_html=project_resp_html.text
-        project_json=project_resp_json.json()
+    #cookies was for requests.get to access the website with an active user session. This is not needed anymore.
+    #cookies = {'session': request.cookies.get('session')}
+    import routes.api.project as r_project
+    project_html = r_project.output_direct(pid=pid, return_type='html_edit')
+    project_resp_json = r_project.output_direct(pid=pid, return_type='json')
+    if project_resp_json[1] == 200:
+        project_json=project_resp_json[0].json
     else:
         abort(500)
     form.name.data = project_json['name']

@@ -12,6 +12,9 @@ bp = Blueprint("project", __name__)
 @bp.route("/project/<int:pid>")
 def output(pid:int):
     return_type = request.args.get('type', default='json')
+    return output_direct(pid,return_type)
+        
+def output_direct(pid: int, return_type: str):
     if return_type not in ['json','html','html_edit']:
         abort(400)
     if return_type == 'html_edit':

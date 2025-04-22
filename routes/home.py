@@ -23,14 +23,12 @@ def page():
         else:
             project_ids = session.query(models.Project.id).all()
         languages_db = session.query(models.Language).order_by(models.Language.name).all()
-        json_responses = [requests.get(url_for('project.output', pid=project_id.id, type='html', _external=True)) for project_id in project_ids]
+        import routes.api.project as r_project
+        json_responses = [r_project.output_direct(pid=project_id.id, return_type='html') for project_id in project_ids]
         about_me = session.query(models.AboutMe.contents).filter_by(id=1).one()
     projects_html = ''
     for jr in json_responses:
-        if jr.status_code == 200:
-            projects_html += jr.text
-        else:
-            abort(500)
+        projects_html += jr
     return render_template("home.html",
                            current_user=current_user,
                            projects_html=projects_html,
