@@ -31,6 +31,13 @@
             <input id="submit-delete" name="submit" type="submit" value="Delete" onclick="return confirm('Are you sure? This tag will also be deleted in any used projects.')">
         </form>
     </div>
+    <h1>Image Preview</h1>
+    <div id="project-media">
+        <figure>
+            <img src="{{ form.url.data }}" alt="{{ form.description.data }}">
+            <a href="{{ form.url.data }}" target="_blank" rel="noopener noreferrer"><figcaption>{{ form.description.data }}</figcaption></a>
+        </figure>
+    </div>
     <script id="popup-contents-script">
         async function submit_form(e){
             e.preventDefault();
