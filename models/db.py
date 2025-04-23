@@ -31,7 +31,10 @@ def initialize(app: Flask, config_data: dict[str, Any]) -> AppEngine:
     else:
         app.config.from_object(config.DevConfig)
     db_name = app.config["SQLALCHEMY_DATABASE_URI"]
-    engine = create_engine(db_name, echo=config_data.get(dbconfig.ECHO_SQL, False))
+    engine = create_engine(db_name, echo=config_data.get(dbconfig.ECHO_SQL, False),
+        pool_recycle=280,
+        pool_pre_ping=True
+    )
     if config_data.get(dbconfig.DELETE_DB, False):
         DBBase.metadata.drop_all(engine)
         print('Deleting old database')
